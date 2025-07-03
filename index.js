@@ -4,7 +4,12 @@ const cron = require('node-cron');
 const fs = require('fs');
 
 // Inisialisasi client WA
-const client = new Client();
+const client = new Client({
+  puppeteer: {
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  }
+});
+
 
 // Tampilkan QR code
 client.on('qr', (qr) => {
