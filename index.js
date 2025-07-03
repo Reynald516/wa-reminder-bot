@@ -5,7 +5,6 @@ const fs = require('fs');
 
 // Inisialisasi client WA pakai penyimpanan sesi otomatis
 const client = new Client({
-  authStrategy: new LocalAuth(),
   puppeteer: {
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
