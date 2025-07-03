@@ -5,31 +5,53 @@ const app = express();
 const cron = require('node-cron');
 const fs = require('fs');
 
-// Inisialisasi client WA pakai penyimpanan sesi otomatis
+// 🔒 Simpan sesi login otomatis
 const client = new Client({
+  authStrategy: new LocalAuth(),
   puppeteer: {
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
 });
 
-// Tampilkan QR code hanya jika belum login
+// 🔁 Simpan QR terbaru agar bisa ditampilkan di browser
+let latestQR = null;
+
 client.on('qr', (qr) => {
-  console.log('📱 Scan QR ini pakai WhatsApp kamu:\n');
-  qrcode.generate(qr, { small: true });
+  latestQR = qr;
+  console.log('📱 QR code tersedia di /qr');
 });
 
-// Tambahan: anti spam & deteksi tanggal baru
+// ✅ Tampilkan QR di browser lewat route /qr
+app.get('/qr', async (req, res) => {
+  if (!latestQR) return res.send('❌ QR belum tersedia atau sudah login.');
+  const qrImage = await qrcode.toDataURL(latestQR);
+  res.send(`
+    <html>
+      <body>
+        <h2>📱 Scan QR WhatsApp</h2>
+        <img src="${qrImage}" />
+      </body>
+    </html>
+  `);
+});
+
+// 🌐 Jalanin server web
+app.listen(process.env.PORT || 3000, () => {
+  console.log('🌐 Server aktif! Akses QR di: /qr');
+});
+
+// 📅 Cegah spam & kirim pesan sesuai tanggal
 let sudahDikirim = new Set();
 let tanggalTerkirim = null;
 
-// Saat WA ready
+// ✅ Saat bot sudah siap
 client.on('ready', () => {
-  console.log('✅ Bot siap!');
+  console.log('✅ Bot siap digunakan!');
 
-  // Jadwal kirim pesan: jam 19:07 tanggal 2 setiap bulan
+  // ⏰ Kirim pesan otomatis setiap tanggal 2 jam 19:07
   cron.schedule('7 19 2 * *', () => {
     const today = new Date();
-    const tanggalHariIni = today.getDate(); 
+    const tanggalHariIni = today.getDate();
     const jam = today.getHours();
     const menit = today.getMinutes();
     console.log(`⏰ Cek otomatis jam ${jam}:${menit}, tanggal ${tanggalHariIni}`);
@@ -65,4 +87,5 @@ client.on('ready', () => {
   });
 });
 
+// 🚀 Mulai bot WhatsApp
 client.initialize();
