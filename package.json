@@ -1,14 +1,11 @@
 {
   "name": "wa-reminder-bot",
   "version": "1.0.0",
-  "description": "Bot pengingat tagihan otomatis via WhatsApp",
+  "description": "WA Reminder Bot",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
-  "keywords": [],
-  "author": "Reynald",
-  "license": "ISC",
   "dependencies": {
     "express": "^4.18.2",
     "node-cron": "^4.2.0",
